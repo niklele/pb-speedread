@@ -1,0 +1,17 @@
+{
+  "uuid": "52aa0ce4-742f-40c4-9a1a-8b11a4b33c0d",
+  "shortName": "speedread",
+  "longName": "speedread",
+  "companyName": "MakeAwesomeHappen",
+  "versionCode": 1,
+  "versionLabel": "1.0.0",
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
