@@ -2,7 +2,7 @@
   "uuid": "52aa0ce4-742f-40c4-9a1a-8b11a4b33c0d",
   "shortName": "speedread",
   "longName": "speedread",
-  "companyName": "MakeAwesomeHappen",
+  "companyName": "Nikhil Lele",
   "versionCode": 1,
   "versionLabel": "1.0.0",
   "watchapp": {
@@ -12,6 +12,22 @@
     "dummy": 0
   },
   "resources": {
-    "media": []
+    "media": [
+      {
+       "type": "font",
+       "name": "FONT_DROID_SANS_MONO_24",
+       "file": "fonts/Droid_Sans_Mono/DroidSansMono.ttf"
+     },
+     {
+       "type": "font",
+       "name": "FONT_SOURCE_CODE_PRO_EXTRALIGHT_24",
+       "file": "fonts/SourceCodePro_FontsOnly-1.017/TTF/SourceCodePro-ExtraLight.ttf"
+     },
+     {
+       "type": "font",
+       "name": "FONT_SOURCE_CODE_PRO_MEDIUM_24",
+       "file": "fonts/SourceCodePro_FontsOnly-1.017/TTF/SourceCodePro-Medium.ttf"
+     }
+    ]
   }
 }

@@ -2,17 +2,18 @@
 typedef struct word {
   char *text;
   uint8_t center; // pos of highlighted character
-  uint8_t pause; // longer if it contains punctuation
+  uint16_t pause; // longer if it contains punctuation
 } word;
 
 // set the 'center point' which will always be displayed at the same point
 void set_center(word *w, uint16_t wlen) {
-  w->center = (wlen / 2) - 1; // naive 50% position
+  // naive 40-50% position
+  w->center = (wlen > 1) ? (wlen / 2) - 1 : 0;
 }
 
 // set the additional delay based on the last character
-void set_pause(word *w, uint16_t wlen) {
-  char last = w->text[wlen - 1];
+void set_pause(word *w, char last) {
+  // char last = w->text[wlen - 1];
   switch (last) {
     case ',':
     case ':':
@@ -31,13 +32,20 @@ void set_pause(word *w, uint16_t wlen) {
       break;
   }
 }
+static const char *spaces = "    ";
 
 // set the fields of a word struct
 static void make_word(word *w, const char *input, uint16_t wlen) {
-  w->text = malloc(wlen + 1);
-  strncpy(w->text, input, wlen);
+
   set_center(w, wlen);
-  set_pause(w, wlen);
+  uint8_t num_spaces = (w->center <= 4) ? (4 - w->center) : 0;
+
+  w->text = malloc(wlen + num_spaces + 1);
+  
+  strncpy(w->text, spaces, num_spaces);
+  strncpy(w->text + num_spaces, input, wlen);
+
+  set_pause(w, input[wlen-1]);
 }
 
 // copy from an input buffer to construct the sequence array
@@ -46,12 +54,16 @@ static uint16_t build_sequence(word **sequence, const char *input) {
 
   // count words
   uint16_t nwords = 0;
-  uint16_t word_ends[50]; // TODO decide size
+  uint16_t word_ends[100]; // TODO decide size
   for (uint16_t i=0; i<len; ++i) {
     if (input[i] == ' ') {
       word_ends[nwords] = i;
       ++nwords;
-    } else if (i == len-1) {
+    } else if (input[i] == '-') {
+      word_ends[nwords] = i; // if this is set to +1 we keep the - but lose the next char
+      ++nwords;
+    }
+    else if (i == len-1) {
       word_ends[nwords] = len;
       ++nwords;
     }
