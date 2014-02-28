@@ -2,7 +2,8 @@
 
 static Window *window;
 static TextLayer *text_layer;
-static AppTimer *timer;
+static TextLayer *info_layer;
+static AppTimer *text_timer;
 
 // #define COMMA_PAUSE 5
 // #define COLON_PAUSE 5
@@ -78,43 +79,58 @@ static uint16_t sequence_input(word **sequence, const char *input) {
   return nwords;
 }
 
-// static void update_text() {
-//   for (int i = 0; i < nwords; ++i)
-//   {
-//     text_layer_set_text(text_layer, seq[i].text);
-//     uint16_t sleep = 500 + seq[i].pause;
+/*
+words/min * 1min/60s * 1s
+*/
 
-//     psleep(sleep);
-//   }
-  
-// }
-
-#define SPEED 300
+static uint32_t base_delay = 300; // 60000/WPM
 static uint16_t w = 0;
-static void timer_callback(void *data) {
+static bool running = false;
 
-  text_layer_set_text(text_layer, seq[w].text);
-  uint16_t sleep = SPEED + seq[w].pause;
+static void text_timer_callback(void *data) {
+  word *curr = (word *) data;
+  text_layer_set_text(text_layer, curr->text);
+  uint16_t sleep = base_delay + curr->pause;
 
-  if (w < nwords) {
+  if (w < (nwords-1)) {
     ++w;
-    timer = app_timer_register(sleep, timer_callback, NULL);
+    text_timer = app_timer_register(sleep, text_timer_callback, &seq[w]);
   }
   else {
-    app_timer_cancel(timer);
+    w = 0;
+    running = false;
+    app_timer_cancel(text_timer);
   }
+}
+
+static void start() {
+  text_timer = app_timer_register(base_delay, text_timer_callback, &seq[w]);
+}
+
+static void pause() {
+  app_timer_cancel(text_timer);
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // text_layer_set_text(text_layer, "Select");
+  running = !running;
+  running ? start() : pause();
+}
+
+static char info[32];
+static void display_info() {
+  unsigned int wpm = 60000 / base_delay;
+  snprintf(info, 32, "WPM: %u\n", wpm);
+  text_layer_set_text(info_layer, info);
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // text_layer_set_text(text_layer, "Up");
+  base_delay -= 50;
+  display_info();
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  // text_layer_set_text(text_layer, "Down");
+  base_delay += 50;
+  display_info();
 }
 
 static void click_config_provider(void *context) {
@@ -128,13 +144,17 @@ static void window_load(Window *window) {
   GRect bounds = layer_get_bounds(window_layer);
 
   text_layer = text_layer_create((GRect) { .origin = { 0, 72 }, .size = { bounds.size.w, 20 } });
-  // text_layer_set_text(text_layer, "Press a button");
   text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(text_layer));
+
+  info_layer = text_layer_create((GRect) { .origin = { 0, 20 }, .size = { bounds.size.w, 20 } });
+  text_layer_set_text_alignment(info_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(info_layer));
 }
 
 static void window_unload(Window *window) {
   text_layer_destroy(text_layer);
+  text_layer_destroy(info_layer);
 }
 
 static void init(void) {
@@ -149,7 +169,7 @@ static void init(void) {
   const bool animated = true;
   window_stack_push(window, animated);
 
-  timer = app_timer_register(500, timer_callback, NULL);
+  display_info();
 }
 
 static void deinit(void) {
