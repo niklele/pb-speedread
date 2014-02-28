@@ -5,10 +5,9 @@ typedef struct word {
   uint16_t pause; // longer if it contains punctuation
 } word;
 
-// set the 'center point' which will always be displayed at the same point
+// set the 'center point' which will always be displayed at the same location
 void set_center(word *w, uint16_t wlen) {
-  // naive 40-50% position
-  w->center = (wlen > 1) ? (wlen / 2) - 1 : 0;
+  w->center = (wlen - 1) / 2;
 }
 
 // set the additional delay based on the last character
