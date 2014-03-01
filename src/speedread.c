@@ -11,9 +11,9 @@ static GFont reg_font;
 
 // static const char* SAMPLE_WORDS = "This is an example sentence to test speed reading. Maybe, if there is punctua-tion, the sentence will be different?";
 
-static const char* SAMPLE_WORDS = "But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?";
+// static const char* SAMPLE_WORDS = "But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally circumstances occur in which toil and pain can procure him some great pleasure. To take a trivial example, which of us ever undertakes laborious physical exercise, except to obtain some advantage from it? But who has any right to find fault with a man who chooses to enjoy a pleasure that has no annoying consequences, or one who avoids a pain that produces no resultant pleasure?";
 
-// static const char *SAMPLE_WORDS = "aaaaaaaaaa bbbbbbbbbb cccccccccc dddddddddd eeeeeeeeee ffffffffff gggggggggg hhhhhhhhhh iiiiiiiiii jjjjjjjjjj kkkkkkkkkk llllllllll mmmmmmmmmm nnnnnnnnnn oooooooooo pppppppppp qqqqqqqqqq rrrrrrrrrr ssssssssss tttttttttt uuuuuuuuuu vvvvvvvvvv wwwwwwwwww xxxxxxxxxx yyyyyyyyyy zzzzzzzzzz 0000000000 1111111111 2222222222 3333333333 4444444444 5555555555 6666666666 7777777777 8888888888 9999999999";
+static const char *SAMPLE_WORDS = "aaaaaaaaaa bbbbbbbbbb cccccccccc dddddddddd eeeeeeeeee ffffffffff gggggggggg hhhhhhhhhh iiiiiiiiii jjjjjjjjjj kkkkkkkkkk llllllllll mmmmmmmmmm nnnnnnnnnn oooooooooo pppppppppp qqqqqqqqqq rrrrrrrrrr ssssssssss tttttttttt uuuuuuuuuu vvvvvvvvvv wwwwwwwwww xxxxxxxxxx yyyyyyyyyy zzzzzzzzzz 0000000000 1111111111 2222222222 3333333333 4444444444 5555555555 6666666666 7777777777 8888888888 9999999999";
 
 // static const char *SAMPLE_WORDS = "here are some? short! words! with which I can do! some tests";
 
@@ -27,7 +27,7 @@ static bool running = false;
 static void text_timer_callback(void *data) {
   word *curr = (word *) data;
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "%s", curr->text);
+  // APP_LOG(APP_LOG_LEVEL_DEBUG, "%s", curr->text);
 
   text_layer_set_text(text_layer, curr->text);
   uint16_t sleep = (60000/base_wpm) + curr->pause;
@@ -39,16 +39,18 @@ static void text_timer_callback(void *data) {
   else {
     w = 0;
     running = false;
-    app_timer_cancel(text_timer);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "reading done");
   }
 }
 
 static void start() {
   text_timer = app_timer_register((60000/base_wpm), text_timer_callback, &seq[w]);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "START");
 }
 
 static void pause() {
   app_timer_cancel(text_timer);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "PAUSE");
 }
 
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -65,11 +67,13 @@ static void display_info() {
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (base_wpm < 600) base_wpm += 50;
   display_info();
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "UP set base_wpm: %u", (unsigned int) base_wpm);
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
   if (base_wpm > 100) base_wpm -= 50;
   display_info();
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "DOWN set base_wpm: %u", (unsigned int) base_wpm);
 }
 
 static void click_config_provider(void *context) {
